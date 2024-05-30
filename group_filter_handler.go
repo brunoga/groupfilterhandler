@@ -26,7 +26,10 @@ var _ slog.Handler = (*GroupFilterHandler)(nil)
 func New(handler slog.Handler, allowGroups ...string) *GroupFilterHandler {
 	allowGroupsMap := make(map[string]struct{}, len(allowGroups))
 	for _, group := range allowGroups {
-		allowGroupsMap[group] = struct{}{}
+		// Ignore empty strings as groups names.
+		if len(group) >= 0 {
+			allowGroupsMap[group] = struct{}{}
+		}
 	}
 
 	return &GroupFilterHandler{
@@ -64,8 +67,11 @@ func (h *GroupFilterHandler) Handle(ctx context.Context, record slog.Record) err
 
 // WithAttrs implements slog.Handler.
 func (h *GroupFilterHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	groupsMap := copyGroupMapAndAddGroup(h.groupsMap, "")
+
 	return &GroupFilterHandler{
 		handler:        h.handler.WithAttrs(attrs),
+		groupsMap:      groupsMap,
 		allowGroupsMap: h.allowGroupsMap,
 	}
 }
@@ -85,10 +91,17 @@ func (h *GroupFilterHandler) WithGroup(name string) slog.Handler {
 
 func copyGroupMapAndAddGroup(groupsMap map[string]struct{},
 	group string) map[string]struct{} {
-	newGroupMap := make(map[string]struct{}, len(groupsMap)+1)
+	var newGroupMap map[string]struct{}
+	if group != "" {
+		newGroupMap = make(map[string]struct{}, len(groupsMap)+1)
+		newGroupMap[group] = struct{}{}
+	} else {
+		newGroupMap = make(map[string]struct{}, len(groupsMap))
+	}
+
 	for k, v := range groupsMap {
 		newGroupMap[k] = v
 	}
-	newGroupMap[group] = struct{}{}
+
 	return newGroupMap
 }

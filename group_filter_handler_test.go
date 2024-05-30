@@ -30,6 +30,15 @@ func TestGroupFilterHandler_Allowed_Groups(t *testing.T) {
 	checkAndResetBuffer(t, &b, "level=INFO msg=\"allowed 2\"\n")
 }
 
+func TestGroupFilterHandler_Logger_With(t *testing.T) {
+	var b bytes.Buffer
+	allowedLogger := testLogger(&b, "allow_group_1").WithGroup("allow_group_1").With(
+		"extra_key", "extra_value")
+
+	allowedLogger.Info("allowed")
+	checkAndResetBuffer(t, &b, "level=INFO msg=allowed allow_group_1.extra_key=extra_value\n")
+}
+
 func testLogger(b *bytes.Buffer, allowedGroups ...string) *slog.Logger {
 	return slog.New(New(slog.NewTextHandler(b, &slog.HandlerOptions{
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
