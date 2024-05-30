@@ -27,7 +27,7 @@ func New(handler slog.Handler, allowGroups ...string) *GroupFilterHandler {
 	allowGroupsMap := make(map[string]struct{}, len(allowGroups))
 	for _, group := range allowGroups {
 		// Ignore empty strings as groups names.
-		if len(group) >= 0 {
+		if len(group) == 0 {
 			allowGroupsMap[group] = struct{}{}
 		}
 	}
