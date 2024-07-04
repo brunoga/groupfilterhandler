@@ -7,6 +7,8 @@ import (
 )
 
 func TestGroupFilterHandler_No_Allowed_groups(t *testing.T) {
+	t.Helper()
+
 	var b bytes.Buffer
 	logger := testLogger(&b)
 

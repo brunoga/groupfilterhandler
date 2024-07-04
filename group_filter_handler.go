@@ -3,6 +3,7 @@ package groupfilterhandler
 import (
 	"context"
 	"log/slog"
+	"strings"
 )
 
 // GroupFilterHandler is a slog.Handler that filters log records based on the
@@ -27,7 +28,7 @@ func New(handler slog.Handler, allowGroups ...string) *GroupFilterHandler {
 	allowGroupsMap := make(map[string]struct{}, len(allowGroups))
 	for _, group := range allowGroups {
 		// Ignore empty strings as groups names.
-		if len(group) == 0 {
+		if len(strings.TrimSpace(group)) != 0 {
 			allowGroupsMap[group] = struct{}{}
 		}
 	}
